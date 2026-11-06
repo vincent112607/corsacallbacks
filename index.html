@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corsa Life Dialer – Old Leads Follow-Up</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#fff; --ink:#1c2433; --muted:#6b7588; --line:#e3e7ee;
+    --brand:#1f4fd1; --brand-ink:#fff;
+    --na:#7a8599; --cb:#d98a00; --vm:#7b3fd1; --won:#118a4e; --ni:#c23b3b; --bad:#555;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  header{background:#0f1a33;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:650}
+  header .stats{display:flex;gap:14px;margin-left:auto;flex-wrap:wrap}
+  header .stat{font-size:12px;opacity:.85}
+  header .stat b{font-size:16px;display:block;opacity:1}
+  .wrap{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px;max-width:1400px;margin:0 auto}
+  @media(max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  button,.btn{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer}
+  button:hover{filter:brightness(.96)}
+  .primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+  input,select,textarea{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:8px;width:100%;background:#fff;color:var(--ink)}
+  textarea{resize:vertical}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .chip{padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .list{max-height:calc(100vh - 290px);overflow:auto;margin:0 -6px}
+  .row{padding:9px 10px;margin:2px 6px;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .row:hover{background:#f1f4f9}
+  .row.sel{background:#e7eefc;outline:1px solid #c5d5f7}
+  .row .nm{font-weight:600}
+  .row .sub{font-size:12px;color:var(--muted)}
+  .tag{font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;white-space:nowrap}
+  .t-new{background:#9aa5b8}.t-na{background:var(--na)}.t-cb{background:var(--cb)}.t-vm{background:var(--vm)}
+  .t-won{background:var(--won)}.t-ni{background:var(--ni)}.t-bad{background:var(--bad)}
+  .due{color:#c23b3b;font-weight:600}
+  .lead-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .lead-head h2{margin:0 0 4px;font-size:24px}
+  .phone{font-size:20px;font-weight:600;letter-spacing:.3px}
+  .meta{color:var(--muted);font-size:13px;margin-top:4px}
+  .callbtn{font-size:18px;padding:14px 26px;border-radius:12px;background:#118a4e;color:#fff;border:none;font-weight:650;text-decoration:none;display:inline-block}
+  .outcomes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0 10px}
+  .outcomes.secondary{grid-template-columns:repeat(3,1fr);margin-top:0}
+  .oc{padding:16px 10px;border-radius:12px;border:none;color:#fff;font-weight:650;font-size:15px}
+  .oc small{display:block;font-weight:400;opacity:.85;font-size:11px;margin-top:3px}
+  .oc.na{background:var(--na)}.oc.cb{background:var(--cb)}.oc.vm{background:var(--vm)}
+  .oc.sm{padding:9px 8px;font-size:13px}
+  .oc.won{background:var(--won)}.oc.ni{background:var(--ni)}.oc.bad{background:var(--bad)}
+  .cbbox{display:none;background:#fff7e6;border:1px solid #f2d39b;border-radius:10px;padding:12px;margin-bottom:12px}
+  .cbbox.show{display:block}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quick{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .quick button{font-size:12px;padding:5px 9px}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+  .hist{font-size:13px;border-top:1px solid var(--line);margin-top:10px}
+  .hist div{padding:6px 0;border-bottom:1px dashed var(--line)}
+  .hist .when{color:var(--muted);font-size:12px}
+  .empty{text-align:center;color:var(--muted);padding:50px 20px}
+  .script{background:#f7f8fb;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;white-space:pre-wrap}
+  details summary{cursor:pointer;font-weight:600;margin:10px 0 6px}
+  .modal{position:fixed;inset:0;background:rgba(10,15,30,.5);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+  .modal.show{display:flex}
+  .modal .card{width:min(640px,100%);max-height:90vh;overflow:auto}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f1a33;color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+  .toast.show{opacity:1}
+  .kbd{font-size:11px;color:var(--muted)}
+  .autonext{display:flex;align-items:center;gap:6px;font-size:13px}
+  .autonext input{width:auto}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📞 Old Leads Dialer</h1>
+  <span style="font-size:12px;opacity:.7">Vincent Abasso · Corsa Life</span>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: list -->
+  <div class="card">
+    <div class="toolbar">
+      <button class="primary" onclick="openModal('importModal')">⬆ Import leads</button>
+      <button onclick="openModal('addModal')">+ Add</button>
+      <button onclick="exportCSV()">⬇ Export</button>
+      <button onclick="openModal('settingsModal')">⚙</button>
+    </div>
+    <input id="search" placeholder="Search name, phone, state, source…" oninput="renderList()">
+    <select id="srcFilter" style="margin-top:6px" onchange="renderList()"><option value="">All call sources</option></select>
+    <div class="filters" id="filters"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- RIGHT: current lead -->
+  <div class="card" id="panel"></div>
+</div>
+
+<!-- Import modal -->
+<div class="modal" id="importModal" onclick="if(event.target===this)closeModal('importModal')">
+  <div class="card">
+    <h3 style="margin-top:0">Import your unclosed clients</h3>
+    <p style="color:var(--muted);margin-top:0">Export your leads from PolicyTech (or any spreadsheet) as a <b>.csv</b> file. Columns are matched automatically — it looks for <i>Name / First Name / Last Name, Phone, State, Email, Age, Product, Carrier, Notes</i>.</p>
+    <input type="file" id="csvFile" accept=".csv,text/csv">
+    <p style="text-align:center;color:var(--muted);margin:10px 0">— or paste CSV text —</p>
+    <textarea id="csvText" rows="7" placeholder="Name,Phone,State,Product,Notes&#10;John Smith,(555) 123-4567,TX,Final Expense,Quoted $62/mo Americo"></textarea>
+    <div class="autonext" style="margin:10px 0"><input type="checkbox" id="skipDupes" checked><label for="skipDupes" style="margin:0;color:var(--ink)">Skip phone numbers already in the list</label></div>
+    <div class="toolbar" style="justify-content:flex-end;margin:0">
+      <button onclick="closeModal('importModal')">Cancel</button>
+      <button class="primary" onclick="doImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add modal -->
+<div class="modal" id="addModal" onclick="if(event.target===this)closeModal('addModal')">
+  <div class="card">
+    <h3 style="margin-top:0">Add a lead</h3>
+    <div class="grid2">
+      <div><label>Name</label><input id="aName"></div>
+      <div><label>Phone</label><input id="aPhone"></div>
+      <div><label>State</label><input id="aState" maxlength="2"></div>
+      <div><label>Product / Quote</label><input id="aProduct"></div>
+    </div>
+    <label style="margin-top:10px">Notes</label><textarea id="aNotes" rows="3"></textarea>
+    <div class="toolbar" style="justify-content:flex-end;margin:10px 0 0">
+      <button onclick="closeModal('addModal')">Cancel</button>
+      <button class="primary" onclick="addLead()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')">
+  <div class="card">
+    <h3 style="margin-top:0">Dialpad & settings</h3>
+    <label>How the Call button dials</label>
+    <select id="sMode" onchange="modeUI()">
+      <option value="api">⚡ Direct – Dialpad API (dials from your Dialpad automatically)</option>
+      <option value="cti">🧩 Embedded Dialpad mini dialer (needs a Client ID from Dialpad)</option>
+      <option value="dialpad">Open Dialpad desktop app (dialpad://)</option>
+      <option value="launch">Dialpad web/Chrome app (dialpad.com/launch)</option>
+      <option value="tel">tel: link (Dialpad set as default phone app / mobile)</option>
+    </select>
+    <div id="apiBox" style="background:#eef3ff;border:1px solid #c9d7fb;border-radius:10px;padding:10px;margin-top:10px">
+      <label>Dialpad API key</label>
+      <input id="sKey" type="password" placeholder="Paste your Dialpad API key" autocomplete="off">
+      <div class="grid2" style="margin-top:8px">
+        <div><label>Dialpad user ID ("me" works with a personal key)</label><input id="sUser" placeholder="me"></div>
+        <div style="display:flex;align-items:flex-end"><button style="width:100%" onclick="testApi()">Test connection</button></div>
+      </div>
+      <div class="kbd" style="margin-top:6px">Dialpad → Settings → My Company (or your profile) → Authentication → API Keys → Add a Key. The key is saved only in this browser on this computer. Keep the Dialpad desktop or web app open and signed in. Dialpad allows 5 dials per minute.</div>
+      <div id="apiTest" class="kbd" style="margin-top:6px"></div>
+    </div>
+    <div id="ctiBox" style="background:#eef3ff;border:1px solid #c9d7fb;border-radius:10px;padding:10px;margin-top:10px">
+      <label>Dialpad mini dialer Client ID</label>
+      <input id="sCti" placeholder="from Dialpad support">
+      <div class="kbd" style="margin-top:6px">Email Dialpad support to get a mini dialer (CTI) Client ID. Give them <b>http://localhost:8765</b> as the allowed origin. Then Dialpad loads inside this page, and Call dials from it.</div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div><label>Call from number (optional – your Dialpad #)</label><input id="sFrom" placeholder="+13234884086"></div>
+      <div><label>Open Dialpad in mini mode</label>
+        <select id="sMini"><option value="1">Yes (Dialpad Everywhere)</option><option value="0">No</option></select></div>
+    </div>
+    <label style="margin-top:10px">Voicemail script ({first} = client's first name)</label>
+    <textarea id="sVM" rows="5"></textarea>
+    <label style="margin-top:10px">Follow-up text ({first} = client's first name)</label>
+    <textarea id="sSMS" rows="3"></textarea>
+    <div class="toolbar" style="justify-content:space-between;margin:12px 0 0">
+      <button style="color:#c23b3b" onclick="clearAll()">Delete all leads</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="closeModal('settingsModal')">Cancel</button>
+        <button class="primary" onclick="saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="ctiDock" style="display:none;position:fixed;right:16px;bottom:16px;width:360px;height:520px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:8"></div>
+
+<script>
+/* ---------------- storage ---------------- */
+const KEY='corsa_dialer_v1';
+let mem={leads:[],settings:null};
+function load(){try{const s=localStorage.getItem(KEY);if(s)mem=JSON.parse(s);}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mem));}catch(e){}}
+load();
+const SEED=[];
+if(!mem.seeded){SEED.forEach(s=>mem.leads.push({id:uid(),email:'',age:'',product:'',status:'new',attempts:0,lastCall:null,callbackAt:null,history:[],...s}));mem.seeded=true;}
+const PTADD=[];
+if(!mem.ptAll){const have=new Set(mem.leads.map(l=>digits(l.phone).slice(-10)));PTADD.forEach(s=>{if(!have.has(digits(s.phone).slice(-10)))mem.leads.push({id:uid(),email:'',age:'',product:'',status:'new',attempts:0,lastCall:null,callbackAt:null,history:[],...s})});mem.ptAll=true;save();}
+const PTNOTES={};
+if(!mem.ptNotes){mem.leads.forEach(l=>{const n=PTNOTES[digits(l.phone).slice(-10)];if(n&&!(l.notes||'').includes(n))l.notes=n+(l.notes?'\n\n'+l.notes:'')});mem.ptNotes=true;save();}
+const DEFAULT_SETTINGS={
+  mode:'api',from:'+13234884086',mini:'1',key:'',user:'me',cti:'',
+  vm:"Hi {first}, this is Vincent Abasso with Corsa Life. I'm following up on the life insurance quote we went over a while back — rates and options have changed, and I'd like to make sure you and your family are still protected. Give me a call back at (323) 488-4086. Again, Vincent at (323) 488-4086. Talk soon!",
+  sms:"Hi {first}, it's Vincent with Corsa Life. I just tried giving you a call about your life insurance quote. When's a good time to reach you? – (323) 488-4086"
+};
+mem.settings={...DEFAULT_SETTINGS,...(mem.settings||{})};
+if(!mem.settings.from)mem.settings.from='+13234884086';
+let S=mem.settings;
+let filter='queue', selId=null;
+
+const OUT={
+  new:{label:'Not called',cls:'t-new'},
+  na:{label:"Didn't answer",cls:'t-na'},
+  cb:{label:'Call back later',cls:'t-cb'},
+  vm:{label:'Left voicemail',cls:'t-vm'},
+  won:{label:'Closed / Sold',cls:'t-won'},
+  ni:{label:'Not interested',cls:'t-ni'},
+  bad:{label:'Wrong / bad #',cls:'t-bad'}
+};
+const DONE=['won','ni','bad'];
+
+/* ---------------- helpers ---------------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function digits(p){return String(p||'').replace(/\D/g,'')}
+function e164(p){let d=digits(p);if(d.length===10)d='1'+d;return d?'+'+d:''}
+function pretty(p){let d=digits(p);if(d.length===11&&d[0]==='1')d=d.slice(1);return d.length===10?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:p}
+function first(n){const f=String(n||'').trim().split(/\s+/)[0];return(!f||/^unk/i.test(f))?'there':f}
+function fmt(ts){if(!ts)return'';const d=new Date(ts);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800)}
+function openModal(id){if(id==='settingsModal'){$('sMode').value=S.mode;$('sKey').value=S.key;$('sUser').value=S.user;$('sCti').value=S.cti;modeUI();$('apiTest').textContent='';$('sFrom').value=S.from;$('sMini').value=S.mini;$('sVM').value=S.vm;$('sSMS').value=S.sms}$(id).classList.add('show')}
+function closeModal(id){$(id).classList.remove('show')}
+function isDue(l){return l.status==='cb'&&l.callbackAt&&new Date(l.callbackAt)<=new Date()}
+
+function dialUrl(phone){
+  const n=e164(phone);
+  if(S.mode==='tel')return'tel:'+n;
+  if(S.mode==='launch')return'https://dialpad.com/launch?phone='+encodeURIComponent(n);
+  const q=new URLSearchParams();
+  if(S.mini==='1')q.set('launchMinimode','1');
+  if(S.from)q.set('fromNumber',e164(S.from));
+  const qs=q.toString();
+  return'dialpad://'+n+(qs?'?'+qs:'');
+}
+
+/* ---------------- CSV ---------------- */
+function parseCSV(text){
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;
+    else if(c===','){row.push(f);f=''}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f=''}
+    else f+=c;
+  }
+  if(f||row.length){row.push(f);rows.push(row)}
+  return rows.filter(r=>r.some(x=>x.trim()!==''));
+}
+function pick(h,names){for(const n of names){const i=h.findIndex(x=>x===n);if(i>-1)return i}
+  for(const n of names){const i=h.findIndex(x=>x.includes(n));if(i>-1)return i}return -1}
+function importRows(rows){
+  if(rows.length<2){toast('No rows found');return 0}
+  const h=rows[0].map(x=>x.trim().toLowerCase());
+  const ix={
+    name:pick(h,['full name','name','client','insured']),
+    fn:pick(h,['first name','firstname','first']),
+    ln:pick(h,['last name','lastname','last']),
+    phone:pick(h,['phone','mobile','cell','primary phone','phone number','number']),
+    state:pick(h,['state','st']),
+    email:pick(h,['email','e-mail']),
+    age:pick(h,['age','dob','date of birth']),
+    product:pick(h,['product','quote','coverage','plan','policy type']),
+    carrier:pick(h,['carrier','company']),
+    notes:pick(h,['notes','note','comments']),
+    source:pick(h,['call source','source','campaign']),
+    crm:pick(h,['status','lead status']),
+    leadDate:pick(h,['lead date','date']),
+  };
+  if(ix.phone<0){toast('Could not find a Phone column');return 0}
+  const existing=new Set(mem.leads.map(l=>digits(l.phone).slice(-10)));
+  let n=0;
+  for(const r of rows.slice(1)){
+    const g=k=>ix[k]>-1?(r[ix[k]]||'').trim():'';
+    const phone=g('phone');if(!digits(phone))continue;
+    const key=digits(phone).slice(-10);
+    if($('skipDupes').checked&&existing.has(key))continue;
+    existing.add(key);
+    const name=g('name')||[g('fn'),g('ln')].filter(Boolean).join(' ')||'Unknown';
+    mem.leads.push({id:uid(),name,phone,state:g('state').toUpperCase(),email:g('email'),age:g('age'),
+      product:[g('product'),g('carrier')].filter(Boolean).join(' · '),notes:g('notes'),source:g('source'),crm:g('crm'),leadDate:g('leadDate'),
+      status:'new',attempts:0,lastCall:null,callbackAt:null,history:[]});
+    n++;
+  }
+  save();return n;
+}
+function doImport(){
+  const file=$('csvFile').files[0];
+  const finish=t=>{const n=importRows(parseCSV(t));if(n){toast(`Imported ${n} leads`);closeModal('importModal');$('csvText').value='';$('csvFile').value='';if(!selId)selId=queue()[0]?.id;render()}};
+  if(file){const r=new FileReader();r.onload=()=>finish(r.result);r.readAsText(file)}
+  else if($('csvText').value.trim())finish($('csvText').value);
+  else toast('Choose a file or paste CSV');
+}
+function exportCSV(){
+  const cols=['Name','Phone','State','Call Source','Lead Status','Lead Date','Email','Age','Product','Notes','Status','Attempts','Last Call','Callback At','Call History'];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const lines=[cols.join(',')].concat(mem.leads.map(l=>[l.name,pretty(l.phone),l.state,l.source,l.crm,l.leadDate,l.email,l.age,l.product,l.notes,OUT[l.status].label,l.attempts,fmt(l.lastCall),fmt(l.callbackAt),
+    l.history.map(h=>`${fmt(h.at)} - ${OUT[h.out].label}${h.note?' ('+h.note+')':''}`).join(' | ')].map(q).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='dialer-results-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+function addLead(){
+  const phone=$('aPhone').value.trim();if(!digits(phone)){toast('Enter a phone number');return}
+  const l={id:uid(),name:$('aName').value.trim()||'Unknown',phone,state:$('aState').value.trim().toUpperCase(),email:'',age:'',
+    product:$('aProduct').value.trim(),notes:$('aNotes').value.trim(),status:'new',attempts:0,lastCall:null,callbackAt:null,history:[]};
+  mem.leads.push(l);save();selId=l.id;['aName','aPhone','aState','aProduct','aNotes'].forEach(i=>$(i).value='');
+  closeModal('addModal');render();
+}
+function saveSettings(){S.mode=$('sMode').value;S.key=$('sKey').value.trim();S.user=$('sUser').value.trim()||'me';S.cti=$('sCti').value.trim();S.from=$('sFrom').value.trim();S.mini=$('sMini').value;S.vm=$('sVM').value;S.sms=$('sSMS').value;save();closeModal('settingsModal');setupCti();render();toast('Saved')}
+function clearAll(){if(confirm('Delete ALL leads and call history? Export first if you need it.')){mem.leads=[];selId=null;save();closeModal('settingsModal');render()}}
+
+/* ---------------- queue logic ---------------- */
+// Call order: callbacks that are due → never called → no answer / voicemail (fewest attempts, oldest call first)
+function queue(){
+  const open=mem.leads.filter(l=>!DONE.includes(l.status));
+  const due=open.filter(isDue).sort((a,b)=>new Date(a.callbackAt)-new Date(b.callbackAt));
+  const fresh=open.filter(l=>l.status==='new');
+  const retry=open.filter(l=>['na','vm'].includes(l.status)).sort((a,b)=>a.attempts-b.attempts||new Date(a.lastCall)-new Date(b.lastCall));
+  return [...due,...fresh,...retry];
+}
+const FILTERS=[
+  ['queue','Call queue',()=>queue()],
+  ['due','Callbacks due',()=>mem.leads.filter(isDue)],
+  ['new','Not called',()=>mem.leads.filter(l=>l.status==='new')],
+  ['na',"No answer",()=>mem.leads.filter(l=>l.status==='na')],
+  ['vm','Voicemail',()=>mem.leads.filter(l=>l.status==='vm')],
+  ['cb','Call back',()=>mem.leads.filter(l=>l.status==='cb').sort((a,b)=>new Date(a.callbackAt)-new Date(b.callbackAt))],
+  ['won','Closed',()=>mem.leads.filter(l=>l.status==='won')],
+  ['all','All',()=>mem.leads],
+];
+function currentList(){
+  let L=FILTERS.find(f=>f[0]===filter)[2]();
+  const src=$('srcFilter').value;if(src)L=L.filter(l=>(l.source||'').split(' / ').includes(src));
+  const s=$('search').value.trim().toLowerCase();
+  if(s){const sd=digits(s);L=L.filter(l=>(l.name+' '+l.state+' '+l.product+' '+l.notes+' '+(l.source||'')+' '+(l.crm||'')).toLowerCase().includes(s)||(sd&&digits(l.phone).includes(sd)))}
+  return L;
+}
+
+/* ---------------- outcomes ---------------- */
+let pendingCb=false;
+function logOutcome(out,extra={}){
+  const l=mem.leads.find(x=>x.id===selId);if(!l)return;
+  const note=($('callNote')?.value||'').trim();
+  l.status=out;l.attempts++;l.lastCall=new Date().toISOString();
+  l.callbackAt=out==='cb'?extra.callbackAt:null;
+  l.history.unshift({at:l.lastCall,out,note:[note,extra.callbackAt?'callback '+fmt(extra.callbackAt):''].filter(Boolean).join(' – ')});
+  save();toast(`${l.name.split(' ')[0]}: ${OUT[out].label}`);
+  pendingCb=false;
+  if($('autoNext')?.checked!==false){const q=queue().filter(x=>x.id!==l.id);selId=(q[0]||l).id}
+  render();
+}
+function showCb(){pendingCb=true;renderPanel();}
+function setCb(mins,tomorrowHour){
+  const d=new Date();
+  if(tomorrowHour!=null){d.setDate(d.getDate()+1);d.setHours(tomorrowHour,0,0,0)}
+  else if(mins==='tonight'){d.setHours(18,0,0,0);if(d<new Date())d.setDate(d.getDate()+1)}
+  else d.setMinutes(d.getMinutes()+mins);
+  const p=n=>String(n).padStart(2,'0');
+  $('cbWhen').value=`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function confirmCb(){
+  const v=$('cbWhen').value;if(!v){toast('Pick a callback time');return}
+  logOutcome('cb',{callbackAt:new Date(v).toISOString()});
+}
+function modeUI(){const m=$('sMode').value;$('apiBox').style.display=m==='api'?'':'none';$('ctiBox').style.display=m==='cti'?'':'none'}
+const ON_HELPER=location.protocol.startsWith('http');
+function setCallStatus(msg,color){const el=$('callStatus');if(el){el.textContent=msg;el.style.color=color||'var(--muted)'}}
+async function dialpadApi(path,method,body,key,user){
+  if(ON_HELPER){ // local helper forwards to Dialpad (avoids browser blocking)
+    const r=await fetch('/api/dialpad',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,user,path,method,body})});
+    const j=await r.json();return{ok:j.status>=200&&j.status<300,status:j.status,text:j.body};
+  }
+  const r=await fetch('https://dialpad.com/api/v2/users/'+encodeURIComponent(user)+path,{method,headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json','Accept':'application/json'},body:body?JSON.stringify(body):undefined});
+  return{ok:r.ok,status:r.status,text:await r.text()};
+}
+function apiErr(r){
+  if(!r.status)return"Couldn't reach Dialpad. Check your internet connection.";
+  if(r.status===401||r.status===403)return'Dialpad rejected the API key. Check the key in ⚙.';
+  if(r.status===404)return'Dialpad user not found. Check the user ID in ⚙.';
+  if(r.status===429)return'Dialpad limit hit (5 dials per minute). Wait a moment and try again.';
+  let m='';try{m=JSON.parse(r.text).error?.message||''}catch(e){m=(r.text||'').slice(0,160)}
+  if(/device/i.test(m))return'Dialpad says no app is ready. Open the Dialpad desktop or web app and sign in.';
+  return'Dialpad error '+r.status+(m?': '+m:'');
+}
+async function testApi(){
+  const key=$('sKey').value.trim(),user=$('sUser').value.trim()||'me';
+  if(!key){$('apiTest').textContent='Paste your API key first.';return}
+  $('apiTest').textContent='Testing…';
+  try{const r=await dialpadApi('','GET',null,key,user);
+    if(r.ok){let n='';try{const j=JSON.parse(r.text);n=[j.first_name,j.last_name].filter(Boolean).join(' ')}catch(e){}
+      $('apiTest').innerHTML='<span style="color:#118a4e">✓ Connected to Dialpad'+(n?' as '+esc(n):'')+'</span>'}
+    else $('apiTest').innerHTML='<span style="color:#c23b3b">'+esc(apiErr(r))+'</span>';
+  }catch(e){$('apiTest').innerHTML='<span style="color:#c23b3b">Your browser blocked the request. Open the dialer with the <b>Start Dialer</b> file instead of double-clicking the page.</span>'}
+}
+let ctiFrame=null;
+function setupCti(){
+  const box=$('ctiDock');
+  if(S.mode!=='cti'||!S.cti){box.style.display='none';box.innerHTML='';ctiFrame=null;return}
+  if(ctiFrame&&ctiFrame.dataset.id===S.cti){box.style.display='block';return}
+  box.innerHTML='<iframe src="https://dialpad.com/apps/'+encodeURIComponent(S.cti)+'" title="Dialpad" allow="microphone; autoplay; camera; display-capture" sandbox="allow-popups allow-scripts allow-same-origin allow-forms" frameborder="0" style="width:100%;height:100%"></iframe>';
+  ctiFrame=box.querySelector('iframe');ctiFrame.dataset.id=S.cti;box.style.display='block';
+}
+window.addEventListener('message',e=>{
+  if(e.origin!=='https://dialpad.com'||!e.data||e.data.api!=='opencti_dialpad')return;
+  if(e.data.method==='call_ringing'&&e.data.payload?.state==='on')setCallStatus('📞 Ringing…','#118a4e');
+  if(e.data.method==='user_authentication'&&ctiFrame)ctiFrame.contentWindow.postMessage({api:'opencti_dialpad',version:'1.0',method:'enable_current_tab'},'https://dialpad.com');
+});
+let lastDial=0;
+async function placeCall(){
+  const l=mem.leads.find(x=>x.id===selId);if(!l)return;
+  const n=e164(l.phone);
+  if(S.mode==='api'){
+    if(!S.key){const m=S.mode;S.mode='dialpad';const u=dialUrl(l.phone);S.mode=m;setCallStatus('Opening '+pretty(l.phone)+' in your Dialpad app… (add an API key in ⚙ to dial directly)','var(--brand)');window.location.href=u;return}
+    if(Date.now()-lastDial<3000)return;lastDial=Date.now();
+    setCallStatus('Dialing '+pretty(l.phone)+' from your Dialpad…','var(--brand)');
+    const body={phone_number:n};if(S.from)body.outbound_caller_id=e164(S.from);
+    try{const r=await dialpadApi('/initiate_call','POST',body,S.key,S.user);
+      if(r.ok)setCallStatus('✓ Dialpad is calling '+pretty(l.phone)+'. Log the outcome below when you\'re done.','#118a4e');
+      else setCallStatus('✗ '+apiErr(r),'#c23b3b');
+    }catch(e){setCallStatus('Opening '+pretty(l.phone)+' in your Dialpad app…','var(--brand)');const m=S.mode;S.mode='dialpad';const u=dialUrl(l.phone);S.mode=m;window.location.href=u}
+    return;
+  }
+  if(S.mode==='cti'){
+    if(!S.cti){toast('Add your mini dialer Client ID first');openModal('settingsModal');return}
+    setupCti();
+    const p={enable_current_tab:true,phone_number:n};if(S.from)p.outbound_caller_id=e164(S.from);
+    ctiFrame.contentWindow.postMessage({api:'opencti_dialpad',version:'1.0',method:'initiate_call',payload:p},'https://dialpad.com');
+    setCallStatus('Sent '+pretty(l.phone)+' to the Dialpad mini dialer…','var(--brand)');return;
+  }
+  window.location.href=dialUrl(l.phone);
+}
+function copyText(t){navigator.clipboard?.writeText(t).then(()=>toast('Copied'),()=>toast('Copy failed'))}
+function saveField(k,v){const l=mem.leads.find(x=>x.id===selId);if(l){l[k]=v;save();renderList()}}
+function undoLast(){
+  const l=mem.leads.find(x=>x.id===selId);if(!l||!l.history.length)return;
+  l.history.shift();l.attempts=Math.max(0,l.attempts-1);
+  const prev=l.history[0];l.status=prev?prev.out:'new';l.lastCall=prev?prev.at:null;
+  if(l.status!=='cb')l.callbackAt=null;save();render();toast('Undone');
+}
+function delLead(){if(confirm('Remove this lead?')){mem.leads=mem.leads.filter(x=>x.id!==selId);selId=queue()[0]?.id||null;save();render()}}
+
+/* ---------------- render ---------------- */
+function renderStats(){
+  const L=mem.leads,today=new Date().toDateString();
+  const callsToday=L.reduce((n,l)=>n+l.history.filter(h=>new Date(h.at).toDateString()===today).length,0);
+  const st=[['Leads',L.length],['In queue',queue().length],['Callbacks due',L.filter(isDue).length],['Calls today',callsToday],['Closed',L.filter(l=>l.status==='won').length]];
+  $('stats').innerHTML=st.map(([k,v])=>`<div class="stat"><b>${v}</b>${k}</div>`).join('');
+}
+function renderFilters(){
+  $('filters').innerHTML=FILTERS.map(([k,lab,fn])=>`<span class="chip ${filter===k?'on':''}" onclick="filter='${k}';renderList()">${lab} (${fn().length})</span>`).join('');
+}
+function renderSources(){
+  const sel=$('srcFilter'),cur=sel.value,c={};
+  mem.leads.forEach(l=>(l.source||'').split(' / ').filter(Boolean).forEach(s=>c[s]=(c[s]||0)+1));
+  sel.innerHTML='<option value="">All call sources</option>'+Object.keys(c).sort((a,b)=>c[b]-c[a]).map(s=>`<option ${s===cur?'selected':''} value="${esc(s)}">${esc(s)} (${c[s]})</option>`).join('');
+}
+function renderList(){
+  renderFilters();
+  const L=currentList();
+  $('list').innerHTML=L.length?L.map(l=>`
+    <div class="row ${l.id===selId?'sel':''}" onclick="selId='${l.id}';pendingCb=false;render()">
+      <div><div class="nm">${esc(l.name)}</div>
+      <div class="sub">${esc(pretty(l.phone))}${l.state?' · '+esc(l.state):''}${l.attempts?' · '+l.attempts+' call'+(l.attempts>1?'s':''):''}${l.source?'<br>📡 '+esc(l.source):''}
+      ${l.status==='cb'&&l.callbackAt?`<br><span class="${isDue(l)?'due':''}">↻ ${fmt(l.callbackAt)}</span>`:''}</div></div>
+      <span class="tag ${OUT[l.status].cls}">${OUT[l.status].label}</span>
+    </div>`).join(''):`<div class="empty">${mem.leads.length?'Nothing here.':'No leads yet — click <b>Import leads</b>.'}</div>`;
+}
+function renderPanel(){
+  const l=mem.leads.find(x=>x.id===selId);
+  if(!l){$('panel').innerHTML=`<div class="empty"><h2 style="color:var(--ink)">Ready to dial</h2>
+    <p>Import your unclosed clients from PolicyTech as a CSV, then work the queue top to bottom.</p>
+    <p class="kbd">Shortcuts: <b>C</b> call · <b>1</b> didn't answer · <b>2</b> call back later · <b>3</b> left voicemail · <b>N</b> next</p>
+    <button class="primary" onclick="openModal('importModal')">⬆ Import leads</button></div>`;return}
+  const vm=S.vm.replaceAll('{first}',first(l.name)), sms=S.sms.replaceAll('{first}',first(l.name));
+  $('panel').innerHTML=`
+    <div class="lead-head">
+      <div>
+        <h2>${esc(l.name)}</h2>
+        <div class="phone">${esc(pretty(l.phone))}</div>
+        <div class="meta">${[l.state,l.age&&'Age '+l.age,l.product,l.email].filter(Boolean).map(esc).join(' · ')||'&nbsp;'}</div>
+        ${l.source?`<div class="meta" style="color:var(--ink)"><b>Call source:</b> ${esc(l.source)}</div>`:''}
+        ${l.crm||l.leadDate?`<div class="meta"><b>Lead status:</b> ${esc(l.crm||'—')}${l.leadDate?' · came in '+esc(l.leadDate):''}</div>`:''}
+        <div class="meta"><span class="tag ${OUT[l.status].cls}">${OUT[l.status].label}</span>
+          ${l.attempts?` &nbsp;${l.attempts} attempt${l.attempts>1?'s':''} · last ${fmt(l.lastCall)}`:''}
+          ${l.status==='cb'&&l.callbackAt?` · <span class="${isDue(l)?'due':''}">callback ${fmt(l.callbackAt)}</span>`:''}</div>
+      </div>
+      <div style="text-align:right">
+        ${S.mode==='api'||S.mode==='cti'?`<button class="callbtn" onclick="placeCall()">📞 Call with Dialpad</button>`:`<a class="callbtn" href="${esc(dialUrl(l.phone))}" title="Opens Dialpad">📞 Call with Dialpad</a>`}
+        <div class="kbd" style="margin-top:6px">press C</div>
+      </div>
+    </div>
+
+    <div id="callStatus" style="margin-top:12px;font-weight:600;min-height:18px"></div>
+    <label style="margin-top:8px">Note for this call (optional)</label>
+    <input id="callNote" placeholder="e.g. spouse answered, wants to talk Tuesday…">
+
+    <div class="outcomes">
+      <button class="oc na" onclick="logOutcome('na')">Didn't Answer<small>key 1</small></button>
+      <button class="oc cb" onclick="showCb()">Can't Talk Now<br>Call Back Later<small>key 2</small></button>
+      <button class="oc vm" onclick="logOutcome('vm')">Left Voicemail<small>key 3</small></button>
+    </div>
+
+    <div class="cbbox ${pendingCb?'show':''}">
+      <b>When should you call back?</b>
+      <div class="quick">
+        <button onclick="setCb(30)">30 min</button><button onclick="setCb(60)">1 hour</button>
+        <button onclick="setCb(120)">2 hours</button><button onclick="setCb('tonight')">6 PM</button>
+        <button onclick="setCb(0,10)">Tomorrow 10 AM</button><button onclick="setCb(0,17)">Tomorrow 5 PM</button>
+      </div>
+      <div style="display:flex;gap:8px"><input type="datetime-local" id="cbWhen"><button class="primary" onclick="confirmCb()">Save callback</button></div>
+    </div>
+
+    <div class="outcomes secondary">
+      <button class="oc sm won" onclick="logOutcome('won')">✓ Closed / Sold</button>
+      <button class="oc sm ni" onclick="logOutcome('ni')">Not Interested</button>
+      <button class="oc sm bad" onclick="logOutcome('bad')">Wrong / Bad #</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div class="autonext"><input type="checkbox" id="autoNext" checked><label for="autoNext" style="margin:0;color:var(--ink)">Jump to next lead after logging</label></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="undoLast()">↶ Undo last</button>
+        <button onclick="nextLead()">Skip → next (N)</button>
+      </div>
+    </div>
+
+    <details ${l.status==='new'||l.status==='na'||l.status==='vm'?'open':''}><summary>🎙 Voicemail script</summary>
+      <div class="script">${esc(vm)}</div></details>
+    <details><summary>💬 Follow-up text</summary>
+      <div class="script">${esc(sms)}</div>
+      <button style="margin-top:6px" onclick="copyText(${esc(JSON.stringify(sms))})">Copy text</button></details>
+
+    <label style="margin-top:12px">📝 Client notes (from PolicyTech – you can edit)</label>
+    <textarea rows="${Math.min(12,Math.max(3,(l.notes||'').split('\n').length+1))}" onchange="saveField('notes',this.value)">${esc(l.notes)}</textarea>
+    <div class="grid2" style="margin-top:8px">
+      <div><label>Product / quote</label><input value="${esc(l.product)}" onchange="saveField('product',this.value)"></div>
+      <div><label>Phone</label><input value="${esc(l.phone)}" onchange="saveField('phone',this.value);renderPanel()"></div>
+    </div>
+
+    <div class="hist"><b style="display:block;margin:10px 0 4px">Call history</b>
+      ${l.history.length?l.history.map(h=>`<div><span class="tag ${OUT[h.out].cls}">${OUT[h.out].label}</span> <span class="when">${fmt(h.at)}</span>${h.note?'<br>'+esc(h.note):''}</div>`).join(''):'<div class="when">No calls logged yet.</div>'}
+    </div>
+    <div style="text-align:right;margin-top:10px"><button style="color:#c23b3b;font-size:12px" onclick="delLead()">Remove lead</button></div>
+  `;
+  if(pendingCb&&!$('cbWhen').value)setCb(0,10);
+}
+function nextLead(){const q=queue();if(!q.length)return;const i=q.findIndex(x=>x.id===selId);selId=q[(i+1)%q.length].id;pendingCb=false;render()}
+function render(){renderStats();renderSources();renderList();renderPanel()}
+
+document.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
+  if(document.querySelector('.modal.show'))return;
+  const k=e.key.toLowerCase();
+  if(k==='c')placeCall();
+  else if(k==='1')logOutcome('na');
+  else if(k==='2')showCb();
+  else if(k==='3')logOutcome('vm');
+  else if(k==='n')nextLead();
+});
+
+if(!selId)selId=queue()[0]?.id||null;
+setupCti();
+render();
+// refresh "due" callbacks every minute
+setInterval(()=>{renderStats();renderList()},60000);
+</script>
+</body>
+</html>
