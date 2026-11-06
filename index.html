@@ -273,7 +273,10 @@ function importRows(rows){
     carrier:pick(h,['carrier','company']),
     notes:pick(h,['notes','note','comments']),
     source:pick(h,['call source','source','campaign']),
-    crm:pick(h,['status','lead status']),
+    crm:pick(h,['lead status','status']),
+    callNotes:pick(h,['call notes','call history','call log']),
+    outcome:h.includes('lead status')?h.indexOf('status'):-1,
+    attempts:h.indexOf('attempts'),lastCall:h.indexOf('last call'),callbackAt:h.indexOf('callback at'),
     leadDate:pick(h,['lead date','date']),
   };
   if(ix.phone<0){toast('Could not find a Phone column');return 0}
@@ -287,8 +290,13 @@ function importRows(rows){
     existing.add(key);
     const name=g('name')||[g('fn'),g('ln')].filter(Boolean).join(' ')||'Unknown';
     mem.leads.push({id:uid(),name,phone,state:g('state').toUpperCase(),email:g('email'),age:g('age'),
-      product:[g('product'),g('carrier')].filter(Boolean).join(' · '),notes:g('notes'),source:g('source'),crm:g('crm'),leadDate:g('leadDate'),
+      product:[g('product'),g('carrier')].filter(Boolean).join(' · '),notes:g('notes'),source:g('source'),crm:g('crm'),leadDate:g('leadDate'),callNotes:g('callNotes'),
       status:'new',attempts:0,lastCall:null,callbackAt:null,history:[]});
+    const L=mem.leads[mem.leads.length-1];
+    const oc=Object.keys(OUT).find(k=>OUT[k].label===g('outcome'));
+    if(oc){L.status=oc;L.attempts=parseInt(g('attempts'))||0;
+      const lc=new Date(g('lastCall'));if(!isNaN(lc))L.lastCall=lc.toISOString();
+      const cb=new Date(g('callbackAt'));if(oc==='cb'&&!isNaN(cb))L.callbackAt=cb.toISOString();}
     n++;
   }
   save();return n;
@@ -301,10 +309,11 @@ function doImport(){
   else toast('Choose a file or paste CSV');
 }
 function exportCSV(){
-  const cols=['Name','Phone','State','Call Source','Lead Status','Lead Date','Email','Age','Product','Notes','Status','Attempts','Last Call','Callback At','Call History'];
+  const cols=['Name','Phone','State','Call Source','Lead Status','Lead Date','Email','Age','Product','Notes','Status','Attempts','Last Call','Callback At','Call Notes'];
+  const ds=x=>x?new Date(x).toLocaleString():'';
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const lines=[cols.join(',')].concat(mem.leads.map(l=>[l.name,pretty(l.phone),l.state,l.source,l.crm,l.leadDate,l.email,l.age,l.product,l.notes,OUT[l.status].label,l.attempts,fmt(l.lastCall),fmt(l.callbackAt),
-    l.history.map(h=>`${fmt(h.at)} - ${OUT[h.out].label}${h.note?' ('+h.note+')':''}`).join(' | ')].map(q).join(',')));
+  const lines=[cols.join(',')].concat(mem.leads.map(l=>[l.name,pretty(l.phone),l.state,l.source,l.crm,l.leadDate,l.email,l.age,l.product,l.notes,OUT[l.status].label,l.attempts,ds(l.lastCall),ds(l.callbackAt),
+    [...l.history.map(h=>`${new Date(h.at).toLocaleString()} – ${OUT[h.out].label}${h.note?' – '+h.note:''}`),l.callNotes].filter(Boolean).join('\n')].map(q).join(',')));
   const blob=new Blob([lines.join('\n')],{type:'text/csv'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='dialer-results-'+new Date().toISOString().slice(0,10)+'.csv';a.click();
@@ -547,6 +556,7 @@ function renderPanel(){
       <div><label>Phone</label><input value="${esc(l.phone)}" onchange="saveField('phone',this.value);renderPanel()"></div>
     </div>
 
+    ${l.callNotes?`<label style="margin-top:12px">📋 Call notes</label><div class="script" style="max-height:180px;overflow:auto">${esc(l.callNotes)}</div>`:''}
     <div class="hist"><b style="display:block;margin:10px 0 4px">Call history</b>
       ${l.history.length?l.history.map(h=>`<div><span class="tag ${OUT[h.out].cls}">${OUT[h.out].label}</span> <span class="when">${fmt(h.at)}</span>${h.note?'<br>'+esc(h.note):''}</div>`).join(''):'<div class="when">No calls logged yet.</div>'}
     </div>
